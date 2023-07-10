@@ -6,6 +6,10 @@ export default function App() {
   const [err, setErr] = useState(null);
   const [start, setStart] = useState(false);
   const [timeoutRef, setTimeoutRef] = useState(null);
+  const [formdata, setFromData] = useState({
+    title: "",
+    director: "",
+  });
 
   useEffect(() => {
     setStart(true);
@@ -40,8 +44,32 @@ export default function App() {
     clearTimeout(timeoutRef);
     setStart(false);
   }
+  function handleChange(e) {
+    setFromData((prev) => {
+      return {
+        ...prev,
+        [e.target.name]: e.target.value,
+      };
+    });
+  }
   return (
     <div>
+      <form>
+        <label>Title</label>
+        <input name="title" value={formdata.title} onChange={handleChange} />
+        <label>Director</label>
+        <input
+          name="director"
+          value={formdata.director}
+          onChange={handleChange}
+        />
+      </form>
+      <button
+        onClick={() => console.log(`${formdata.title}-${formdata.director}`)}
+      >
+        add movie
+      </button>
+      <br />
       <button>Get Movies</button>
       <div>
         {start && isLoading && films.length > 0 && (
