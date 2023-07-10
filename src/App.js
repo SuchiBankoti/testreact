@@ -1,27 +1,44 @@
 import React, { useState, useEffect } from "react";
 
+const api =
+  "https://react-http-f5f3d-default-rtdb.asia-southeast1.firebasedatabase.app";
 export default function App() {
+  const [update, setUpdate] = useState(0);
   const [isLoading, setIsLoading] = useState(false);
   const [films, setFilms] = useState([]);
   const [err, setErr] = useState(null);
   const [start, setStart] = useState(false);
   const [timeoutRef, setTimeoutRef] = useState(null);
-  const [formdata, setFromData] = useState({
+  const [formdata, setFormData] = useState({
     title: "",
     director: "",
   });
+  async function addMovieHandler() {
+    const response = await fetch(`${api}/movies.json`, {
+      method: "POST",
+      body: JSON.stringify(formdata),
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+    const data = response.json();
+  }
 
   useEffect(() => {
     setStart(true);
     getData();
-  }, []);
+  }, [update]);
   async function getData() {
     try {
       setIsLoading(true);
-      const response = await fetch("https://swapi.dev/api/films/");
+      const response = await fetch(`${api}/movies.json`);
       const data = await response.json();
-      const results = data.results;
+      const results = Object.entries(data).map(([key, value]) => ({
+        key,
+        ...value,
+      }));
       setFilms(results);
+      console.log(results);
     } catch (error) {
       setErr(error.message);
       setIsLoading(false);
@@ -45,12 +62,19 @@ export default function App() {
     setStart(false);
   }
   function handleChange(e) {
-    setFromData((prev) => {
+    setFormData((prev) => {
       return {
         ...prev,
         [e.target.name]: e.target.value,
       };
     });
+  }
+
+  async function deleteMovie(id) {
+    await fetch(`${api}/movies/${id}.json`, {
+      method: "DELETE",
+    });
+    setUpdate((prev) => prev + 1);
   }
   return (
     <div>
@@ -64,11 +88,7 @@ export default function App() {
           onChange={handleChange}
         />
       </form>
-      <button
-        onClick={() => console.log(`${formdata.title}-${formdata.director}`)}
-      >
-        add movie
-      </button>
+      <button onClick={addMovieHandler}>add movie</button>
       <br />
       <button>Get Movies</button>
       <div>
@@ -76,12 +96,16 @@ export default function App() {
           <div>
             <h1>Movies</h1>
             <div>
-              {films.map((film, i) => (
+              {films.map((filmObj, i) => (
                 <div key={i}>
                   <span style={{ fontWeight: "bolder", margin: "1rem" }}>
-                    {film.title}
+                    {filmObj.title}
                   </span>
-                  <span>{film.director}</span>
+                  <span>{filmObj.director}</span>
+                  <span>{filmObj.key}</span>
+                  <button onClick={() => deleteMovie(filmObj.key)}>
+                    delete movie
+                  </button>
                 </div>
               ))}
             </div>
