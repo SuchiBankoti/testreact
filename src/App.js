@@ -7,11 +7,14 @@ export default function App() {
   const [start, setStart] = useState(false);
   const [timeoutRef, setTimeoutRef] = useState(null);
 
+  useEffect(() => {
+    setStart(true);
+    getData();
+  }, []);
   async function getData() {
     try {
-      setStart(true);
       setIsLoading(true);
-      const response = await fetch("https://swapi.dev/api/filmsi/");
+      const response = await fetch("https://swapi.dev/api/films/");
       const data = await response.json();
       const results = data.results;
       setFilms(results);
@@ -39,7 +42,7 @@ export default function App() {
   }
   return (
     <div>
-      <button onClick={getData}>Get Movies</button>
+      <button>Get Movies</button>
       <div>
         {start && isLoading && films.length > 0 && (
           <div>
